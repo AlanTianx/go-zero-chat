@@ -1,0 +1,54 @@
+syntax = "v1"
+
+info(
+    title: "user"
+    desc: "用户账户相关"
+    author: "alan"
+    email: "13838182466@163.com"
+    version: "v1"
+)
+
+
+type LoginCodeReq {
+    Phone string `form:"phone"`
+}
+
+type LoginCodeResp {
+    CodeKey string `json:"codeKey"`
+}
+
+type UserLoginReq {
+    Phone string `form:"phone"`
+    Code string `form:"code"`
+    CodeKey string `form:"code_key"`
+}
+
+type LoginResp {
+    AccessToken string `json:"accessToken"`
+    AccessExpire int64 `json:"accessExpire"`
+}
+
+type UserInfoReq {
+}
+
+type UserInfoResp {
+    Uuid string `json:"uuid"`
+    Username string `json:"username"`
+    Phone string `json:"phone"`
+}
+
+type UserSaveReq {
+    Username string `form:"username"`
+}
+
+type UserSaveResp {
+}
+
+type UserTokenReq {
+
+}
+
+type UserTokenResp {
+    Token string `json:"token"`
+    ExpireTime int64 `json:"expireTime"`
+}

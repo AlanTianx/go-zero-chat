@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package sms;
+
+option go_package = "./sms";
+
+message SendSmsReq {
+    string Action = 1; // 发送消息类型 login -
+    string Phone = 2;
+    string Msg = 3; // 消息内容
+}
+
+message SendSmsResp {
+    string Code = 1;
+    string Msg = 2;
+}
+
+
+service Sms {
+    rpc sendSms(SendSmsReq) returns (SendSmsResp);
+}

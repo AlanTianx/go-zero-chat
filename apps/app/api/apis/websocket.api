@@ -1,0 +1,19 @@
+syntax = "v1"
+
+info(
+    title: "neffos-test"
+    desc: "测试neffos websocket"
+    author: "Alan"
+    email: "13838182466@163.com"
+    version: "v1"
+)
+
+
+type WebsocketReq {
+    Token string `form:"token"`
+}
+
+type WebsocketResp {
+    // TODO: add members here and delete this comment
+}
+

@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+package user;
+
+option go_package = "./user";
+
+
+message LoginReq {
+    string Phone = 1;
+    string CodeKey = 2;
+    string Code = 3;
+}
+
+message LoginRes {
+    int64 Id = 1;
+    string Uuid = 2;
+    string Username = 3;
+    string Phone = 4;
+}
+
+message LoginCodeReq {
+    string Phone = 1;
+}
+
+message LoginCodeRes {
+    string Code = 1;
+    string CodeKey = 2;
+}
+
+message DetailReq {
+    int64 Id = 1;
+}
+
+message SaveReq {
+    int64 Id = 1;
+    string Username = 2;
+}
+
+message SaveRes {
+}
+
+message GetUserTokenReq {
+    int64 Id = 1;
+}
+
+message GetUserTokenRes {
+    string Token = 1;
+    int64 ExpireTime = 2;
+}
+
+message CheckTokenReq {
+    string TokenMd5 = 1;
+}
+
+message CheckTokenRes {
+    int64 Id = 1;
+    string Uuid = 2;
+    string Username = 3;
+}
+
+service User {
+    rpc Login(LoginReq) returns (LoginRes);
+    rpc LoginCode(LoginCodeReq) returns (LoginCodeRes);
+    rpc Detail(DetailReq) returns (LoginRes);
+    rpc Save(SaveReq) returns (SaveRes);
+    rpc GetUserToken(GetUserTokenReq) returns (GetUserTokenRes);
+    rpc CheckUserToken(CheckTokenReq) returns (CheckTokenRes);
+}

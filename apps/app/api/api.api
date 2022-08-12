@@ -1,0 +1,59 @@
+syntax = "v1"
+
+info(
+	title: "neffos-test"
+	desc: "测试neffos websocket"
+	author: "Alan"
+	email: "13838182466@163.com"
+	version: "v1"
+)
+
+import (
+	"apis/user.api"
+	"apis/websocket.api"
+)
+
+// 用户登录
+@server(
+	prefix: v1/user
+	group: user
+)
+service api-api {
+	@doc "用户登录"
+	@handler loginCode
+	get /loginCode (LoginCodeReq) returns (LoginCodeResp)
+	
+	@doc "用户登录"
+	@handler login
+	post /login (UserLoginReq) returns (LoginResp)
+}
+
+@server(
+	prefix: v1/user
+	jwt : JwtAuth
+	group : user
+)
+service api-api {
+	@doc "get user info"
+	@handler detail
+	get / (UserInfoReq) returns (UserInfoResp)
+	
+	@doc "update user info"
+	@handler save
+	put / (UserSaveReq) returns (UserSaveResp)
+	
+	@doc "get user token"
+	@handler token
+	get /token (UserTokenReq) returns (UserTokenResp)
+}
+
+// 用户ws
+@server(
+	prefix: v1/websocket
+	group: ws
+)
+service api-api {
+	@doc "test websocket"
+	@handler chat
+	get /chat (WebsocketReq) returns (WebsocketResp)
+}
