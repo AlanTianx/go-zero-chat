@@ -1,1 +1,4 @@
 .idea
+/apps/app/api/logs/
+/apps/sms/logs/
+/apps/user/rpc/logs/
