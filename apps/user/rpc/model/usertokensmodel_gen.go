@@ -82,7 +82,7 @@ func (m *defaultUserTokensModel) FindOne(ctx context.Context, tokenKey string) (
 func (m *defaultUserTokensModel) Update(ctx context.Context, data *UserTokens) error {
 	userTokensIdKey := fmt.Sprintf("%s%v", cacheUserTokensKeyPrefix, data.TokenKey)
 	err := m.ExecCtx(ctx, func(conn *gorm.DB) error {
-		return conn.Save(data).Error
+		return conn.Select("status").Save(data).Error
 	}, userTokensIdKey)
 	return err
 }

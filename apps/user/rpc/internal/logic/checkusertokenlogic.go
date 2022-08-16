@@ -31,6 +31,12 @@ func (l *CheckUserTokenLogic) CheckUserToken(in *user.CheckTokenReq) (*user.Chec
 		return nil, errors.Wrapf(err, "req: %+v", in)
 	}
 
+	// token失效
+	defer func() {
+		v.Status = 0
+		_ = l.svcCtx.UserTokensModel.Update(l.ctx, v)
+	}()
+
 	if v.ExpireTime < time.Now().Unix() {
 		return nil, errors.Wrapf(errors.New("token已经失效"), "req: %+v", in)
 	}

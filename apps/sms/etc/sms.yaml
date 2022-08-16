@@ -1,8 +1,8 @@
 Name: sms.rpc
-ListenOn: 127.0.0.1:5433
+ListenOn: :5433
 Etcd:
   Hosts:
-    - 127.0.0.1:2379
+    - c-etcd:2379
   Key: sms.rpc
 Sms:
   KeyId: "*****"

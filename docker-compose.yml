@@ -1,0 +1,104 @@
+version: "3.9"
+
+services:
+  chat-db-mysql:
+    image: mysql:latest
+    container_name: c-mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      TZ: Asia/Shanghai
+      MYSQL_PASSWORD: 123456
+      MYSQL_ROOT_PASSWORD: 123456
+    ports:
+      - "3306:3306"
+    networks:
+      - chat
+  #    volumes:
+  #      - /root/docker-compose/mysql/data:/var/lib/mysql
+
+  chat-db-rides:
+    image: redis:latest
+    container_name: c-redis
+    command: redis-server --port 6379 --requirepass alan  --appendonly yes
+    restart: always
+    environment:
+      TZ: Asia/Shanghai
+    ports:
+      - "6379:6379"
+    networks:
+      - chat
+  #    volume:
+  #      - ${DATA_PATH_HOST}/redis:/data
+
+  chat-db-etcd:
+    image: bitnami/etcd:latest
+    container_name: c-etcd
+    restart: always
+    environment:
+      - ALLOW_NONE_AUTHENTICATION=yes
+      - TZ=Asia/Shanghai
+    ports:
+      - "2379:2379"
+      - "2380:2380"
+    networks:
+      - chat
+
+  chat-api:
+    build:
+      context: .
+      target: chat-api
+    #    container_name: user-rpc # 声明这个后无法集群
+    depends_on:
+      - chat-user-rpc
+      - chat-db-etcd
+      - chat-db-mysql
+      - chat-db-rides
+    ports:
+      - "8989:8989"
+    privileged: true
+    volumes:
+      - "e:\\go-project\\go-zero-chat\\apps\\app\\api\\logs:/app/logs"
+      - "e:\\go-project\\go-zero-chat\\apps\\app\\api\\etc:/app/etc"
+    networks:
+      - chat
+
+  chat-user-rpc:
+    build:
+      context: .
+      target: user-rpc
+    #    container_name: user-rpc # 声明这个后无法集群
+    depends_on:
+      - chat-db-rides
+      - chat-db-mysql
+      - chat-db-etcd
+    ports:
+      - "9999:9999"
+    privileged: true
+    volumes:
+      - "e:\\go-project\\go-zero-chat\\apps\\user\\rpc\\logs:/app/logs"
+      - "e:\\go-project\\go-zero-chat\\apps\\user\\rpc\\etc:/app/etc"
+    networks:
+      - chat
+
+  chat-sms-rpc:
+    build:
+      context: .
+      target: sms-rpc
+    depends_on:
+      - chat-db-etcd
+      - chat-db-mysql
+      - chat-db-rides
+    #    container_name: user-rpc # 声明这个后无法集群
+    ports:
+      - "5433:5433"
+    privileged: true
+    volumes:
+      - "e:\\go-project\\go-zero-chat\\apps\\sms\\logs:/app/logs"
+      - "e:\\go-project\\go-zero-chat\\apps\\sms\\etc:/app/etc"
+    networks:
+      - chat
+
+networks:
+  chat:
+    driver: bridge

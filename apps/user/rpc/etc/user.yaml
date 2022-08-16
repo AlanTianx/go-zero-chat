@@ -1,26 +1,26 @@
 Name: user.rpc
-ListenOn: 127.0.0.1:9999
+ListenOn: :9999
 Etcd:
   Hosts:
-    - 127.0.0.1:2379
+    - c-etcd:2379
   Key: user.rpc
 
 Mysql:
-  DataSource: root:123456@tcp(127.0.0.1:3306)/chat?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
+  DataSource: root:123456@tcp(c-mysql:3306)/chat?charset=utf8mb4&parseTime=true&loc=Asia%2FShanghai
 
 SmsRpc:
   Etcd:
     Hosts:
-      - 127.0.0.1:2379
+      - c-etcd:2379
     Key: sms.rpc
   NonBlock: true
 
 CacheRedis:
-  - Host: 127.0.0.1:6379
+  - Host: c-redis:6379
     Type: node
     Pass: alan
 
 BizRedis:
-  Host: 127.0.0.1:6379
+  Host: c-redis:6379
   Pass: alan
   Type: node

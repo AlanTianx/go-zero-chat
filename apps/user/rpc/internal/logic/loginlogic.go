@@ -37,7 +37,7 @@ func (l *LoginLogic) Login(in *user.LoginReq) (*user.LoginRes, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "req: %+v", in)
 	}
-	if !bytes.Equal([]byte(v), hash.Md5([]byte(fmt.Sprintf("%s%s", in.Phone, in.Code)))) {
+	if !bytes.Equal([]byte(v), []byte(hash.Md5Hex([]byte(fmt.Sprintf("%s%v", in.Phone, in.Code))))) {
 		return nil, errors.Wrapf(errors.New("验证码错误"), "req:%+v", in)
 	}
 	if in.Phone == "" {
