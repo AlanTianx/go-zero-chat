@@ -148,7 +148,7 @@ func ChatHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return r.FormValue("username")
 		}
 
-		// 提取出 spanCtx 后面websocket交互中每次生成新的context 加入spanCtx  完成完整的链路追踪
+		// todo 提取出 spanCtx 后面websocket交互中每次生成新的context 加入spanCtx  完成完整的链路追踪---这里是错误的链路追踪应该分裂span(研究后修复)
 		spanCtx := trace.SpanContextFromContext(r.Context())
 
 		_, err = server.Upgrade(w, r, func(socket neffos.Socket) neffos.Socket {
