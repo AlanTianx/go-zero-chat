@@ -24,3 +24,9 @@ BizRedis:
   Host: c-redis:6379
   Pass: alan
   Type: node
+
+Telemetry:
+  Name: chat.user.rpc
+  Endpoint: http://c-jaeger:14268/api/traces
+  Sampler: 1.0
+  Batcher: jaeger

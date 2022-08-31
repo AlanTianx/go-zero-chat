@@ -7,3 +7,9 @@ Etcd:
 Sms:
   KeyId: "*****"
   KeySecret: "*****"
+
+Telemetry:
+  Name: chat.sms.rpc
+  Endpoint: http://c-jaeger:14268/api/traces
+  Sampler: 1.0
+  Batcher: jaeger

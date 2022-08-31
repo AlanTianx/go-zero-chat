@@ -2,6 +2,7 @@ package ws
 
 import (
 	"context"
+	"github.com/kataras/neffos"
 	"github.com/pkg/errors"
 	"github.com/zeromicro/go-zero/core/hash"
 	"go-zero-chat/apps/user/rpc/user"
@@ -12,10 +13,20 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
+const (
+	OnChatEvent = "chat"
+)
+
 type ChatLogic struct {
 	logx.Logger
 	ctx    context.Context
 	svcCtx *svc.ServiceContext
+}
+
+func (l *ChatLogic) WithCtx(ctx context.Context) *ChatLogic {
+	c := *l
+	c.ctx = ctx
+	return &c
 }
 
 type UserInfo struct {
@@ -42,4 +53,10 @@ func (l *ChatLogic) CheckToken(req *types.WebsocketReq) (resp *UserInfo, err err
 		Uuid:     v.Uuid,
 		Username: v.Username,
 	}, nil
+}
+
+func (l *ChatLogic) OnChat(nsConn *neffos.NSConn, msg neffos.Message) error {
+	// todo 解析 msg 进行具体业务处理 ---
+
+	return nil
 }

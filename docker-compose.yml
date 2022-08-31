@@ -43,6 +43,16 @@ services:
       - "2380:2380"
     networks:
       - chat
+  chat-log-jaeger:
+    image: jaegertracing/all-in-one:latest
+    container_name: c-jaeger
+    environment:
+      - TZ=Asia/Shanghai
+    ports:
+      - "5000:16686"      # 设置容器16686端口映射指定宿主机端口，可在宿主机127.0.0.1:5000访问
+    networks:
+      - chat
+    restart: always
 
   chat-api:
     build:

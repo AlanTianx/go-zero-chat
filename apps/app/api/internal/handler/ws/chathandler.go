@@ -7,7 +7,6 @@ import (
 	"github.com/kataras/neffos"
 	"github.com/kataras/neffos/gorilla"
 	stackexchange "github.com/kataras/neffos/stackexchange/redis"
-	"github.com/zeromicro/go-zero/core/logx"
 	"go-zero-chat/apps/app/api/internal/logic/ws"
 	"go.opentelemetry.io/otel/trace"
 	"net/http"
@@ -19,7 +18,6 @@ import (
 
 const (
 	Namespace = "chat"
-	ChatEvent = "chat"
 )
 
 var server = neffos.New(gorilla.Upgrader(websocket.Upgrader{
@@ -34,44 +32,61 @@ var server = neffos.New(gorilla.Upgrader(websocket.Upgrader{
 		neffos.OnNamespaceConnected: func(nsConn *neffos.NSConn, msg neffos.Message) error {
 			// 服务器回复客户端
 			nsConn.Emit(msg.Event, []byte((fmt.Sprintf("欢迎%s加入聊天室", nsConn.Conn.ID()))))
-			logx.Info("websocket Connected success:", nsConn.Conn.ID())
+
+			// 广播给其他客户端 我进入了聊天室
+			nsConn.Conn.Server().Broadcast(nsConn, neffos.Message{
+				Namespace: msg.Namespace,
+				//Room:      msg.Room,
+				Event: msg.Event,
+				Body:  []byte((fmt.Sprintf("欢迎%s加入聊天室", nsConn.Conn.ID()))),
+				To:    "",
+			})
+
 			return nil
 		},
 		neffos.OnNamespaceDisconnect: func(nsConn *neffos.NSConn, msg neffos.Message) error {
-			logx.Info("websocket disConnected")
+			// 广播给其他客户端 我离开了聊天室
 			nsConn.Conn.Server().Broadcast(nsConn, neffos.Message{
 				Namespace: msg.Namespace,
-				Room:      msg.Room,
-				Event:     msg.Event,
-				Body:      []byte((fmt.Sprintf("%s离开了聊天室", nsConn.Conn.ID()))),
-				To:        "",
+				//Room:      msg.Room,
+				Event: msg.Event,
+				Body:  []byte((fmt.Sprintf("%s离开了聊天室", nsConn.Conn.ID()))),
+				To:    "",
 			})
 			return nil
 		},
-		ChatEvent: func(nsConn *neffos.NSConn, msg neffos.Message) error {
-
+		// todo 引入 Room 时可以使用
+		//neffos.OnRoomJoin: func(nsConn *neffos.NSConn, message neffos.Message) error {
+		//	return nil
+		//},
+		//neffos.OnRoomLeft: func(nsConn *neffos.NSConn, message neffos.Message) error {
+		//	return nil
+		//},
+		ws.OnChatEvent: func(nsConn *neffos.NSConn, msg neffos.Message) error {
 			myCtx := GetContext(nsConn.Conn)
 			// todo ctx可以作为后续具体业务func的链路追踪
 			ctx := trace.ContextWithSpanContext(context.TODO(), myCtx.spanCtx)
-			fmt.Println(ctx)
 
+			return myCtx.l.WithCtx(ctx).OnChat(nsConn, msg)
+
+			// ps gorilla 消息发送说明
 			// 广播消息给某个客户端
-			nsConn.Conn.Server().Broadcast(nsConn, neffos.Message{
-				Namespace: msg.Namespace, // todo 你也可以广播给其他namespace
-				Room:      msg.Room,      // todo 你也可以广播给其他Room
-				Event:     msg.Event,     // todo 你也可以广播给其他Event
-				Body:      []byte((fmt.Sprintf("i am %s", nsConn.Conn.ID()))),
-				To:        "A", // 假设A是某个客户端的nsConn.Conn.ID()
-			})
+			//nsConn.Conn.Server().Broadcast(nsConn, neffos.Message{
+			//	Namespace: msg.Namespace, // todo 你也可以广播给其他namespace
+			//	Room:      msg.Room,      // todo 你也可以广播给其他Room
+			//	Event:     msg.Event,     // todo 你也可以广播给其他Event
+			//	Body:      []byte((fmt.Sprintf("i am %s", nsConn.Conn.ID()))),
+			//	To:        "A", // 假设A是某个客户端的nsConn.Conn.ID()
+			//})
 
 			// 广播消息给其他客户端-自己不接收此消息
-			nsConn.Conn.Server().Broadcast(nsConn, neffos.Message{
-				Namespace: msg.Namespace,
-				Room:      msg.Room,
-				Event:     msg.Event,
-				Body:      []byte((fmt.Sprintf("i am %s", nsConn.Conn.ID()))),
-				To:        "",
-			})
+			//nsConn.Conn.Server().Broadcast(nsConn, neffos.Message{
+			//	Namespace: msg.Namespace,
+			//	Room:      msg.Room,
+			//	Event:     msg.Event,
+			//	Body:      []byte((fmt.Sprintf("i am %s", nsConn.Conn.ID()))),
+			//	To:        "",
+			//})
 
 			// 广播消息给所有客户端
 			//nsConn.Conn.Server().Broadcast(nil, neffos.Message{
@@ -81,7 +96,6 @@ var server = neffos.New(gorilla.Upgrader(websocket.Upgrader{
 			//	Body:      []byte((fmt.Sprintf("i am %s", nsConn.Conn.ID()))),
 			//	To:        "",
 			//})
-			return nil
 		},
 	},
 })
@@ -91,7 +105,7 @@ func WsServerInit(svcCtx *svc.ServiceContext) {
 	// 设置消息广播为同步 异步可能丢失消息
 	server.SyncBroadcaster = true
 
-	// 设置网络交互  以支持集群 该操作会覆盖 server.SyncBroadcaster 设置让它失效。
+	// 设置网络交互  以支持集群 该操作会覆盖 server.SyncBroadcaster设置 让它无效。
 	cfg := stackexchange.Config{
 		Addr:     svcCtx.Config.BizRedis.Host,
 		Password: svcCtx.Config.BizRedis.Pass,
@@ -148,7 +162,7 @@ func ChatHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 			return r.FormValue("username")
 		}
 
-		// todo 提取出 spanCtx 后面websocket交互中每次生成新的context 加入spanCtx  完成完整的链路追踪---这里是错误的链路追踪应该分裂span(研究后修复)
+		// todo 提取出 spanCtx 后面websocket交互中每次生成新的context 加入spanCtx
 		spanCtx := trace.SpanContextFromContext(r.Context())
 
 		_, err = server.Upgrade(w, r, func(socket neffos.Socket) neffos.Socket {

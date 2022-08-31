@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
-
 	"go-zero-chat/apps/sms/internal/config"
 	"go-zero-chat/apps/sms/internal/server"
 	"go-zero-chat/apps/sms/internal/svc"

@@ -23,3 +23,11 @@ UserRpc:
     Hosts:
       - c-etcd:2379
     Key: user.rpc
+
+Telemetry:
+  Name: chat.api
+  Endpoint: http://c-jaeger:14268/api/traces
+  #  Name: user.api
+  #  Endpoint: http://jaeger:14268/api/traces
+  Sampler: 1.0
+  Batcher: jaeger
