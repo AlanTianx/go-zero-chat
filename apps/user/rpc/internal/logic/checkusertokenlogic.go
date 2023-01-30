@@ -3,6 +3,7 @@ package logic
 import (
 	"context"
 	"github.com/pkg/errors"
+	"go-zero-chat/pkg/errorm"
 	"time"
 
 	"go-zero-chat/apps/user/rpc/internal/svc"
@@ -28,7 +29,7 @@ func NewCheckUserTokenLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Ch
 func (l *CheckUserTokenLogic) CheckUserToken(in *user.CheckTokenReq) (*user.CheckTokenRes, error) {
 	v, err := l.svcCtx.UserTokensModel.FindOne(l.ctx, in.GetTokenMd5())
 	if err != nil {
-		return nil, errors.Wrapf(err, "req: %+v", in)
+		return nil, errorm.NewError(errorm.ErrDbNotFound, "", err)
 	}
 
 	// token失效
@@ -43,7 +44,7 @@ func (l *CheckUserTokenLogic) CheckUserToken(in *user.CheckTokenReq) (*user.Chec
 
 	u, err := l.svcCtx.UserModel.FindOne(l.ctx, v.UserId)
 	if err != nil {
-		return nil, errors.Wrapf(err, "req: %+v", in)
+		return nil, errorm.NewError(errorm.ErrDbNotFound, "", err)
 	}
 
 	return &user.CheckTokenRes{

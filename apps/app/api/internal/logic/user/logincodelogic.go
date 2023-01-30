@@ -1,13 +1,12 @@
 package user
 
 import (
+	"context"
+	"github.com/zeromicro/go-zero/core/limit"
+	"github.com/zeromicro/go-zero/core/logx"
 	"go-zero-chat/apps/app/api/internal/svc"
 	"go-zero-chat/apps/app/api/internal/types"
 	"go-zero-chat/apps/user/rpc/user"
-	"context"
-	"github.com/pkg/errors"
-	"github.com/zeromicro/go-zero/core/limit"
-	"github.com/zeromicro/go-zero/core/logx"
 )
 
 type LoginCodeLogic struct {
@@ -32,7 +31,7 @@ func (l *LoginCodeLogic) LoginCode(req *types.LoginCodeReq) (resp *types.LoginCo
 	})
 
 	if err != nil {
-		return nil, errors.Wrapf(err, "req: %+v", req)
+		return nil, err
 	}
 
 	return &types.LoginCodeResp{
