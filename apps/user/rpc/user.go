@@ -11,6 +11,7 @@ import (
 	"go-zero-chat/apps/user/rpc/internal/server"
 	"go-zero-chat/apps/user/rpc/internal/svc"
 	"go-zero-chat/apps/user/rpc/user"
+	"go-zero-chat/pkg/interceptor/rpcserver"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -40,6 +41,9 @@ func main() {
 			reflection.Register(grpcServer)
 		}
 	})
+
+	s.AddUnaryInterceptors(rpcserver.LoggerInterceptor)
+
 	defer s.Stop()
 
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
