@@ -17,6 +17,7 @@ import (
 @server(
 	prefix: v1/user
 	group: user
+	middleware: Limit
 )
 service api-api {
 	@doc "用户登录"
@@ -31,6 +32,7 @@ service api-api {
 @server(
 	prefix: v1/user
 	jwt : JwtAuth
+	middleware: Limit
 	group : user
 )
 service api-api {
