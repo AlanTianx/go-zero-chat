@@ -1,6 +1,10 @@
 # go-zero-chat
 
-go-zero微服务初尝试、websocket服务
+_微服务学习与演示_
+
+##### 使用技术
+- go-zero
+- gorilla/websocket
 
 ##### docker-compose启动
 
