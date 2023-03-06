@@ -7,7 +7,7 @@ _微服务学习与演示_
 - gorilla/websocket
 
 ##### 知识点
-- [限流](https://go-zero.dev/cn/docs/blog/governance/tokenlimit)
+- [限流](https://go-zero.dev/cn/docs/blog/governance/tokenlimit) 
 - [熔断](https://go-zero.dev/cn/docs/blog/governance/breaker-algorithms) 
 
 
