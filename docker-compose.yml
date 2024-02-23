@@ -17,7 +17,7 @@ services:
   #    volumes:
   #      - /root/docker-compose/mysql/data:/var/lib/mysql
 
-  chat-db-rides:
+  chat-db-redis:
     image: redis:latest
     container_name: c-redis
     command: redis-server --port 6379 --requirepass alan  --appendonly yes
