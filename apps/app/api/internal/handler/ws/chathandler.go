@@ -100,7 +100,7 @@ var server = neffos.New(gorilla.Upgrader(websocket.Upgrader{
 	},
 })
 
-// 初始化ws-server设置 main 函数中调用
+// WsServerInit 初始化ws-server设置 main 函数中调用
 func WsServerInit(svcCtx *svc.ServiceContext) {
 	// 设置消息广播为同步 异步可能丢失消息
 	server.SyncBroadcaster = true
@@ -141,15 +141,18 @@ func GetContext(c *neffos.Conn) *MyWsContext {
 	return nil
 }
 
+// ChatHandler api接口 处理升级ws
 func ChatHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var req types.WebsocketReq
 
+		// 解析api参数
 		if err := httpx.Parse(r, &req); err != nil {
 			httpx.Error(w, err)
 			return
 		}
 
+		// 鉴权---
 		l := ws.NewChatLogic(r.Context(), svcCtx)
 		u, err := l.CheckToken(&req)
 		if err != nil {
@@ -158,6 +161,7 @@ func ChatHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		}
 		r.Form.Add("username", u.Username)
 
+		// 给ws的连接生成一个id
 		idGen := func(w http.ResponseWriter, r *http.Request) string {
 			return r.FormValue("username")
 		}
@@ -165,6 +169,7 @@ func ChatHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {
 		// todo 提取出 spanCtx 后面websocket交互中每次生成新的context 加入spanCtx
 		spanCtx := trace.SpanContextFromContext(r.Context())
 
+		// 升级成ws
 		_, err = server.Upgrade(w, r, func(socket neffos.Socket) neffos.Socket {
 			return &socketWrapper{
 				Socket: socket,
